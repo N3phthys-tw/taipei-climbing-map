@@ -1,67 +1,82 @@
 [
   {
-    "id": "redpoint-beitou",
-    "name": "小岩館-北投 (RedPoint-Beitou)",
-    "location": {
-      "lat": 25.132,
-      "lng": 121.498
-    },
-    "address": "台北市北投區中央南路一段129號",
-    "phone": "02-2894-1329",
-    "website": "https://www.redpointclimbing.com/",
-    "type": ["抱石 (Bouldering)"],
-    "operatingHours": "平日 13:00-22:00, 假日 10:00-20:00"
-  },
-  {
-    "id": "pogo-climbing",
-    "name": "POGO 攀岩館",
-    "location": {
-      "lat": 25.045,
-      "lng": 121.615
-    },
-    "address": "新北市新莊區建國一路122號 (雖然在新莊，但捷運可達，作為範例資料)",
-    "phone": "02-2908-1212",
-    "website": "http://www.pogoclimbing.com/",
-    "type": ["抱石 (Bouldering)"],
-    "operatingHours": "平日 13:00-23:00, 假日 10:00-22:00"
-  },
-  {
-    "id": "t-up-wanhua",
-    "name": "T-UP 萬華店 (T-UP Wanhua)",
-    "location": {
-      "lat": 25.034,
-      "lng": 121.499
-    },
-    "address": "台北市萬華區大理街160巷20弄30號",
+    "id": "double-apex-wanhua",
+    "name": "原岩攀岩館-萬華店",
+    "location": { "lat": 25.0342, "lng": 121.4969 },
+    "address": "台北市萬華區大理街149號",
     "phone": "02-2308-8250",
-    "website": "https://www.tupclimbing.com/",
+    "website": "https://www.facebook.com/DoubleApexClimbing/",
     "type": ["抱石 (Bouldering)"],
-    "operatingHours": "平日 13:00-23:00, 假日 10:00-20:00"
+    "operatingHours": "請洽場館"
   },
   {
-    "id": "yideng-climbing",
-    "name": "一登攀岩館 (Yideng Climbing Gym)",
-    "location": {
-      "lat": 25.051,
-      "lng": 121.531
-    },
-    "address": "台北市中山區吉林路20號B1",
-    "phone": "02-2542-8809",
-    "website": "https://www.facebook.com/yidengclimbing/",
+    "id": "corner-huashan",
+    "name": "角攀岩館-華山店 (CORNER)",
+    "location": { "lat": 25.0476, "lng": 121.5298 },
+    "address": "台北市中山區新生北路一段86號",
+    "phone": "02-2563-3749",
+    "website": "https://www.facebook.com/cornerclimbing/",
     "type": ["抱石 (Bouldering)"],
-    "operatingHours": "平日 13:00-23:00, 假日 10:00-21:00"
+    "operatingHours": "請洽場館"
   },
   {
-    "id": "civic-bouldergym",
-    "name": "市民攀岩館 (Civic Boulder Gym)",
-    "location": {
-      "lat": 25.048,
-      "lng": 121.545
-    },
-    "address": "台北市中山區市民大道三段198號",
-    "phone": "02-2771-5555",
+    "id": "corner-zhongshan",
+    "name": "角攀岩館-中山店 (CORNER)",
+    "location": { "lat": 25.0592, "lng": 121.5226 },
+    "address": "台北市中山區中山北路二段68號B1",
+    "phone": "02-2521-8233",
+    "website": "https://www.facebook.com/cornerclimbing/",
+    "type": ["抱石 (Bouldering)"],
+    "operatingHours": "請洽場館"
+  },
+  {
+    "id": "civic-nankang",
+    "name": "市民抱石攀岩館-南港店",
+    "location": { "lat": 25.0539, "lng": 121.6138 },
+    "address": "台北市南港區市民大道八段552號2樓",
+    "phone": "02-2788-6220",
     "website": "http://www.civicbouldergym.com/",
     "type": ["抱石 (Bouldering)"],
-    "operatingHours": "平日 10:00-22:30, 假日 10:00-20:00"
+    "operatingHours": "請洽場館"
+  },
+  {
+    "id": "double8-dihua",
+    "name": "岩究所 (Double 8) - 迪化街",
+    "location": { "lat": 25.0614, "lng": 121.5113 },
+    "address": "台北市大同區迪化街一段251號",
+    "phone": "02-2550-8081",
+    "website": "https://www.facebook.com/double8roclimbing/",
+    "type": ["上攀 (Top Rope/Lead)", "抱石 (Bouldering)"],
+    "operatingHours": "請洽場館"
+  },
+  {
+    "id": "double-apex-mingde",
+    "name": "原岩攀岩館-明德店",
+    "location": { "lat": 25.1098, "lng": 121.5192 },
+    "address": "台北市北投區文林北路222號B1",
+    "phone": "02-2821-9988",
+    "website": "https://www.facebook.com/DoubleApexClimbing/",
+    "type": ["抱石 (Bouldering)"],
+    "operatingHours": "請洽場館"
+  },
+  {
+    "id": "neihu-sports-center",
+    "name": "內湖運動中心攀岩館",
+    "location": { "lat": 25.0792, "lng": 121.5714 },
+    "address": "台北市內湖區洲子街12號",
+    "phone": "02-2656-0052",
+    "website": "https://nhsc.cyc.org.tw/",
+    "type": ["上攀 (Top Rope/Lead)", "抱石 (Bouldering)"],
+    "operatingHours": "請洽場館"
+  },
+  {
+    "id": "y17-climbing",
+    "name": "Y17 岩究所 (青年局9F)",
+    "location": { "lat": 25.0388, "lng": 121.5235 },
+    "address": "台北市中正區仁愛路一段17號9樓",
+    "phone": "02-2343-2388",
+    "website": "https://www.facebook.com/double8roclimbing/",
+    "type": ["上攀 (Top Rope/Lead)"],
+    "operatingHours": "請洽場館"
   }
 ]
