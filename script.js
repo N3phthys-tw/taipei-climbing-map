@@ -1,31 +1,26 @@
 /**
- * Taipei Climbing Gym Map Application - Super Robust Version
+ * Taipei Climbing Gym Map Application - Enhanced Version
  */
 
 const App = (() => {
     // 1. Data Fetching
     const DataFetcher = {
         async fetchGyms() {
-            console.log("Fetching gyms data...");
             try {
                 const response = await fetch('climbing-gyms.json');
                 if (!response.ok) throw new Error('Gyms JSON not found');
-                const data = await response.json();
-                console.log("Gyms data loaded:", data.length, "items");
-                return data;
+                return await response.json();
             } catch (error) {
                 console.error('Error fetching gyms:', error);
                 return [];
             }
         },
         async fetchTaipeiGeoJSON() {
-            console.log("Fetching GeoJSON data...");
             try {
-                const response = await fetch('https://raw.githubusercontent.com/g0v/tw-town-geojson/master/taipei.json');
+                // 使用新的可靠 GeoJSON 來源
+                const response = await fetch('https://raw.githubusercontent.com/wenlab501/Rt/main/TPE_town.geojson');
                 if (!response.ok) throw new Error('GeoJSON source not found');
-                const data = await response.json();
-                console.log("GeoJSON data loaded");
-                return data;
+                return await response.json();
             } catch (error) {
                 console.warn('GeoJSON load failed, highlighting disabled:', error.message);
                 return null;
@@ -33,20 +28,20 @@ const App = (() => {
         }
     };
 
-    // 2. Map Components
+    // 2. Map UI Components
     const MapUI = {
         map: null,
         districtLayer: null,
         
         init() {
-            console.log("Initializing Leaflet map...");
             this.map = L.map('map', {
                 maxBounds: [[24.85, 121.30], [25.30, 121.80]],
                 minZoom: 11
             }).setView([25.045, 121.53], 12);
 
+            // 使用 CartoDB Light 底圖
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap'
+                attribution: '&copy; OpenStreetMap &copy; CARTO'
             }).addTo(this.map);
             
             return this.map;
@@ -72,7 +67,8 @@ const App = (() => {
                     return self.getDistrictStyle(false);
                 },
                 onEachFeature: function(feature, layer) {
-                    const name = feature.properties.T_Name || feature.properties.T_NAME || feature.properties.townname || "未知區域";
+                    // 注意：此 GeoJSON 的屬性名稱為 TOWNNAME
+                    const name = feature.properties.TOWNNAME || feature.properties.T_Name || "未知區域";
                     layer.bindTooltip(name, { sticky: true, direction: 'top' });
                 }
             }).addTo(this.map);
@@ -80,11 +76,10 @@ const App = (() => {
 
         highlightDistrict(districtName) {
             if (!this.districtLayer) return;
-            console.log("Highlighting district:", districtName);
             
             this.districtLayer.eachLayer(layer => {
                 const props = layer.feature.properties;
-                const name = props.T_Name || props.T_NAME || props.townname;
+                const name = props.TOWNNAME || props.T_Name;
                 
                 if (name === districtName) {
                     layer.setStyle(this.getDistrictStyle(true));
@@ -102,14 +97,9 @@ const App = (() => {
         }
     };
 
-    // 3. Markers
+    // 3. Markers & Popups
     const MarkerLogic = {
         renderMarkers(map, gyms) {
-            if (!gyms || gyms.length === 0) {
-                console.error("No gyms to render!");
-                return;
-            }
-
             gyms.forEach(gym => {
                 const marker = L.marker([gym.location.lat, gym.location.lng]).addTo(map);
                 
@@ -142,21 +132,16 @@ const App = (() => {
         }
     };
 
-    // 4. Main Init
+    // 4. Main Controller
     async function init() {
-        try {
-            const map = MapUI.init();
-            
-            // 優先載入場館，確保地圖有用
-            const gyms = await DataFetcher.fetchGyms();
-            MarkerLogic.renderMarkers(map, gyms);
-            
-            // 延後載入行政區，不影響核心功能
-            MapUI.loadDistricts();
-            
-        } catch (err) {
-            console.error("Application initialization failed:", err);
-        }
+        const map = MapUI.init();
+        
+        // 先顯示標記點
+        const gyms = await DataFetcher.fetchGyms();
+        MarkerLogic.renderMarkers(map, gyms);
+        
+        // 非同步載入行政區邊界
+        MapUI.loadDistricts();
     }
 
     return { init };
