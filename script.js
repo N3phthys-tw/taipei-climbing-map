@@ -1,34 +1,32 @@
 /**
- * Taipei Climbing Gym Map Application
+ * Taipei Climbing Gym Map Application - Fixed Version
  */
 
 const App = (() => {
-    // 1. DataFetcher Module
     const DataFetcher = {
         async fetchGyms() {
             try {
                 const response = await fetch('climbing-gyms.json');
-                if (!response.ok) throw new Error('Network response was not ok');
+                if (!response.ok) throw new Error('Gyms JSON load failed');
                 return await response.json();
             } catch (error) {
-                console.error('Fetching gyms failed:', error);
+                console.error('Error fetching gyms:', error);
                 return [];
             }
         },
         async fetchTaipeiGeoJSON() {
             try {
-                // 使用公共 API 獲取台北市行政區 GeoJSON (簡化版)
+                // 嘗試獲取台北市行政區 GeoJSON
                 const response = await fetch('https://raw.githubusercontent.com/g0v/tw-town-geojson/master/taipei.json');
                 if (!response.ok) throw new Error('GeoJSON load failed');
                 return await response.json();
             } catch (error) {
-                console.error('Fetching GeoJSON failed:', error);
+                console.warn('Could not load GeoJSON, highlighting will be disabled.', error);
                 return null;
             }
         }
     };
 
-    // 2. InfoWindow Module
     const InfoWindow = {
         render(gym) {
             const types = gym.type.map(t => {
@@ -49,20 +47,19 @@ const App = (() => {
         }
     };
 
-    // 3. MapContainer Module
     const MapContainer = {
         map: null,
         districtLayer: null,
         init() {
-            // Initialize map centered at Taipei City
+            // 1. 初始化地圖
             this.map = L.map('map', {
-                maxBounds: [[24.95, 121.40], [25.25, 121.75]], // 限制地圖範圍在台北周邊
+                maxBounds: [[24.90, 121.35], [25.25, 121.75]],
                 minZoom: 11
             }).setView([25.045, 121.53], 12);
 
-            // Add dark mode tile layer for better highlight contrast
+            // 2. 設定底圖 (CartoDB Light)
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                attribution: '&copy; OpenStreetMap'
             }).addTo(this.map);
 
             return this.map;
@@ -71,48 +68,46 @@ const App = (() => {
             const geoData = await DataFetcher.fetchTaipeiGeoJSON();
             if (!geoData) return;
 
+            // 存儲行政區名稱欄位 (解決 T_Name vs T_NAME 的問題)
             this.districtLayer = L.geoJSON(geoData, {
-                style: this.getDefaultStyle,
+                style: (feature) => this.getStyle(false),
                 onEachFeature: (feature, layer) => {
-                    layer.bindTooltip(feature.properties.T_Name, { sticky: true });
+                    const name = feature.properties.T_Name || feature.properties.T_NAME || feature.properties.townname;
+                    layer.bindTooltip(name, { sticky: true });
                 }
             }).addTo(this.map);
         },
-        getDefaultStyle(feature) {
+        getStyle(isHighlight) {
             return {
-                fillColor: '#34495e',
-                weight: 2,
+                fillColor: isHighlight ? '#e74c3c' : '#34495e',
+                weight: isHighlight ? 3 : 2,
                 opacity: 1,
-                color: 'white',
-                fillOpacity: 0.1 // 預設變暗/透明
+                color: isHighlight ? '#c0392b' : 'white',
+                fillOpacity: isHighlight ? 0.4 : 0.1
             };
         },
         highlightDistrict(districtName) {
             if (!this.districtLayer) return;
 
             this.districtLayer.eachLayer(layer => {
-                const name = layer.feature.properties.T_Name; // 根據 g0v 圖資的屬性名稱
+                const props = layer.feature.properties;
+                const name = props.T_Name || props.T_NAME || props.townname;
+                
                 if (name === districtName) {
-                    layer.setStyle({
-                        fillColor: '#e74c3c',
-                        fillOpacity: 0.4,
-                        weight: 3,
-                        color: '#c0392b'
-                    });
+                    layer.setStyle(this.getStyle(true));
                     layer.bringToBack();
                 } else {
-                    layer.setStyle(this.getDefaultStyle());
+                    layer.setStyle(this.getStyle(false));
                 }
             });
         },
         resetHighlight() {
             if (this.districtLayer) {
-                this.districtLayer.setStyle(this.getDefaultStyle());
+                this.districtLayer.setStyle(this.getStyle(false));
             }
         }
     };
 
-    // 4. MarkerManager Module
     const MarkerManager = {
         createMarkers(map, gyms) {
             gyms.forEach(gym => {
@@ -123,24 +118,27 @@ const App = (() => {
                 });
 
                 marker.on('click', (e) => {
+                    // 先停止冒泡防止地圖點擊事件觸發
+                    L.DomEvent.stopPropagation(e);
                     map.panTo(e.latlng);
                     MapContainer.highlightDistrict(gym.district);
                 });
             });
 
-            // 點擊地圖空白處重置高亮
-            map.on('click', (e) => {
-                if (e.originalEvent.target.id === 'map') {
-                    MapContainer.resetHighlight();
-                }
+            // 點擊地圖背景重置
+            map.on('click', () => {
+                MapContainer.resetHighlight();
             });
         }
     };
 
-    // Initialization Logic
     async function init() {
         const map = MapContainer.init();
-        await MapContainer.addDistrictLayer();
+        // 確保圖層載入不會卡住標記渲染
+        try {
+            await MapContainer.addDistrictLayer();
+        } catch(e) { console.error(e); }
+        
         const gyms = await DataFetcher.fetchGyms();
         MarkerManager.createMarkers(map, gyms);
     }
