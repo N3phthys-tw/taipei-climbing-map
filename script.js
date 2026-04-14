@@ -1,5 +1,5 @@
 /**
- * Taipei Climbing Gym Map - Simple & Stable Version
+ * Taipei Climbing Gym Map - Standard Color Version
  */
 
 const App = (() => {
@@ -21,7 +21,6 @@ const App = (() => {
     // 2. InfoWindow Module
     const InfoWindow = {
         render(gym) {
-            // 處理攀岩類型標籤
             const typeList = Array.isArray(gym.type) ? gym.type : [gym.type];
             const types = typeList.map(t => {
                 const className = t.includes('抱石') ? 'tag-bouldering' : 'tag-lead';
@@ -48,9 +47,9 @@ const App = (() => {
             // 初始化地圖，設置在台北市中心
             this.map = L.map('map').setView([25.045, 121.53], 12);
 
-            // 使用 CartoDB Light 底圖，視覺效果最清晰
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap &copy; CARTO'
+            // 使用 OpenStreetMap 標準底圖 (色彩豐富：綠地、藍水、黃路)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(this.map);
 
             return this.map;
@@ -61,20 +60,17 @@ const App = (() => {
     const MarkerManager = {
         createMarkers(map, gyms) {
             gyms.forEach(gym => {
-                // 自動偵測不同的座標欄位格式
                 const lat = gym.lat || (gym.location && gym.location.lat);
                 const lng = gym.lng || (gym.location && gym.location.lng);
 
                 if (lat && lng) {
                     const marker = L.marker([lat, lng]).addTo(map);
                     
-                    // 綁定資訊視窗
                     marker.bindPopup(InfoWindow.render(gym), {
                         className: 'custom-popup',
                         offset: [0, -32]
                     });
 
-                    // 點擊標記時自動平移置中
                     marker.on('click', (e) => {
                         map.panTo(e.latlng);
                     });
@@ -83,18 +79,16 @@ const App = (() => {
         }
     };
 
-    // 初始化應用程式
     async function init() {
         const map = MapContainer.init();
         const gyms = await DataFetcher.fetchGyms();
         MarkerManager.createMarkers(map, gyms);
-        console.log("台北市攀岩地圖 - 穩定版已啟動");
+        console.log("台北市攀岩地圖 - 標準色彩版已啟動");
     }
 
     return { init };
 })();
 
-// 當 DOM 載入完成後執行
 document.addEventListener('DOMContentLoaded', () => {
     App.init();
 });
