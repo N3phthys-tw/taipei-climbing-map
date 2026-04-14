@@ -1,5 +1,5 @@
 /**
- * Taipei Climbing Gym Map - Visual & Logic Fix
+ * Taipei Climbing Gym Map - Fuzzy Matching Fix
  */
 
 const App = (() => {
@@ -8,20 +8,13 @@ const App = (() => {
             try {
                 const response = await fetch('./climbing-gyms.json?v=' + Date.now());
                 return await response.json();
-            } catch (e) {
-                console.error("Gyms data failed:", e);
-                return [];
-            }
+            } catch (e) { return []; }
         },
         async fetchGeoJSON() {
             try {
-                // 使用 wenlab501 的圖資
                 const response = await fetch('https://raw.githubusercontent.com/wenlab501/Rt/main/TPE_town.geojson');
                 return await response.json();
-            } catch (e) {
-                console.warn("GeoJSON failed:", e);
-                return null;
-            }
+            } catch (e) { return null; }
         }
     };
 
@@ -36,49 +29,38 @@ const App = (() => {
             }).setView([25.045, 121.53], 12);
 
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap'
+                attribution: '&copy; OSM'
             }).addTo(this.map);
             
             return this.map;
         },
 
-        normalize(name) {
-            return (name || "").toString().replace(/臺/g, "台").trim();
+        // 提取核心名稱（如：大同區 -> 大同）
+        getCoreName(name) {
+            if (!name) return "";
+            return name.toString().replace(/臺/g, "台").replace(/區/g, "").trim();
         },
 
-        // 預設樣式：完全透明，只留淡邊框，解決「灰白」問題
         defaultStyle() {
-            return {
-                fillColor: '#34495e',
-                fillOpacity: 0, // 改為 0，讓底圖變亮
-                weight: 1,
-                color: '#ced4da', // 淡灰色邊框
-                opacity: 0.5
-            };
+            return { fillColor: '#34495e', fillOpacity: 0, weight: 1, color: '#ced4da', opacity: 0.5 };
         },
 
         highlightStyle() {
-            return {
-                fillColor: '#e74c3c',
-                fillOpacity: 0.3,
-                weight: 2,
-                color: '#c0392b',
-                opacity: 1
-            };
+            return { fillColor: '#e74c3c', fillOpacity: 0.3, weight: 2, color: '#c0392b', opacity: 1 };
         },
 
         highlight(districtName) {
             if (!this.districtLayer) return;
-            const target = this.normalize(districtName);
-            console.log("尋找行政區:", target);
+            const target = this.getCoreName(districtName);
+            console.log("正在尋找的核心名稱:", target);
 
             let found = false;
             this.districtLayer.eachLayer(layer => {
                 const props = layer.feature.properties;
-                // 暴力匹配：檢查所有屬性值
-                const values = Object.values(props).map(v => this.normalize(v));
+                // 檢查 GeoJSON 裡的所有屬性值，只要包含「大同」這兩個字就亮起
+                const values = Object.values(props).map(v => this.getCoreName(v));
                 
-                if (values.includes(target)) {
+                if (values.some(v => v === target)) {
                     layer.setStyle(this.highlightStyle());
                     layer.bringToFront();
                     found = true;
@@ -87,7 +69,13 @@ const App = (() => {
                 }
             });
             
-            if (!found) console.warn("未找到匹配行政區:", target);
+            if (!found) {
+                console.warn("無法匹配:", target);
+                // 偵錯用：列出目前圖層中所有的名稱
+                this.districtLayer.eachLayer(layer => {
+                    console.log("圖層屬性範例:", layer.feature.properties);
+                });
+            }
         }
     };
 
@@ -121,29 +109,24 @@ const App = (() => {
             });
 
             map.on('click', (e) => {
-                if (e.originalEvent.target.id === 'map' || e.originalEvent.target.classList.contains('leaflet-container')) {
-                    if (MapUI.districtLayer) MapUI.districtLayer.setStyle(MapUI.defaultStyle());
-                }
+                if (MapUI.districtLayer) MapUI.districtLayer.setStyle(MapUI.defaultStyle());
             });
         }
     };
 
     async function init() {
         const map = MapUI.init();
-        
-        // 1. 優先載入場館
         const gyms = await DataFetcher.fetchGyms();
         MarkerManager.render(map, gyms);
 
-        // 2. 載入行政區圖層
         const geoData = await DataFetcher.fetchGeoJSON();
         if (geoData) {
             MapUI.districtLayer = L.geoJSON(geoData, {
                 style: MapUI.defaultStyle(),
-                interactive: false // 讓點擊直接穿透到標記點
+                interactive: false
             }).addTo(map);
             MapUI.districtLayer.bringToBack();
-            console.log("行政區圖層已就緒");
+            console.log("行政區圖層已就緒，匹配邏輯升級為核心模糊匹配");
         }
     }
 
