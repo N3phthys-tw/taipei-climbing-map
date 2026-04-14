@@ -1,5 +1,5 @@
 /**
- * Taipei Climbing Gym Map - Final Robust Version
+ * Taipei Climbing Gym Map - Production Version
  */
 
 const App = (() => {
@@ -15,11 +15,14 @@ const App = (() => {
         },
         async fetchTaipeiGeoJSON() {
             try {
-                // 使用更穩定的圖資來源
+                // 使用 wenlab501 的 TPE_town.geojson
                 const response = await fetch('https://raw.githubusercontent.com/wenlab501/Rt/main/TPE_town.geojson');
-                return await response.json();
+                if (!response.ok) throw new Error('GeoJSON fetch error');
+                const data = await response.json();
+                console.log("GeoJSON loaded, found features:", data.features.length);
+                return data;
             } catch (error) {
-                console.warn('GeoJSON failed:', error);
+                console.error('GeoJSON failed:', error);
                 return null;
             }
         }
@@ -42,19 +45,18 @@ const App = (() => {
             return this.map;
         },
 
-        // 正規化名稱：將 臺 改為 台，確保匹配
         normalizeName(name) {
             if (!name) return "";
-            return name.replace(/臺/g, "台");
+            return name.replace(/臺/g, "台").trim();
         },
 
         getStyle(isHighlight) {
             return {
                 fillColor: isHighlight ? '#e74c3c' : '#bdc3c7',
                 weight: isHighlight ? 3 : 1,
-                opacity: 0.5,
-                color: isHighlight ? '#c0392b' : '#95a5a6',
-                fillOpacity: isHighlight ? 0.3 : 0.02 // 平時幾乎透明，高亮才顯色
+                opacity: 0.8,
+                color: isHighlight ? '#c0392b' : '#ecf0f1',
+                fillOpacity: isHighlight ? 0.4 : 0.05
             };
         },
 
@@ -66,26 +68,39 @@ const App = (() => {
             this.districtLayer = L.geoJSON(geoData, {
                 style: () => self.getStyle(false),
                 onEachFeature: (feature, layer) => {
-                    const name = feature.properties.TOWNNAME || feature.properties.T_Name || "";
-                    layer.bindTooltip(name, { sticky: true });
+                    // 根據實測，該圖資使用 T_Name 欄位
+                    const name = feature.properties.T_Name || feature.properties.TOWNNAME || "";
+                    layer.bindTooltip(name, { sticky: true, direction: 'top' });
                 }
             }).addTo(this.map);
             
-            this.districtLayer.bringToBack(); // 確保在標記點下方
+            this.districtLayer.bringToBack();
+            console.log("Districts layer added to map");
         },
 
         highlightDistrict(districtName) {
-            if (!this.districtLayer) return;
+            if (!this.districtLayer) {
+                console.warn("District layer not ready yet");
+                return;
+            }
             const targetName = this.normalizeName(districtName);
+            console.log("Attempting to highlight:", targetName);
 
+            let found = false;
             this.districtLayer.eachLayer(layer => {
-                const geoName = this.normalizeName(layer.feature.properties.TOWNNAME || layer.feature.properties.T_Name);
+                const props = layer.feature.properties;
+                const geoName = this.normalizeName(props.T_Name || props.TOWNNAME || "");
+                
                 if (geoName === targetName) {
                     layer.setStyle(this.getStyle(true));
+                    layer.bringToFront(); // 高亮的行政區移到最前以確保顯色
+                    found = true;
                 } else {
                     layer.setStyle(this.getStyle(false));
                 }
             });
+
+            if (!found) console.warn("No match found for district:", districtName);
         },
 
         resetHighlight() {
@@ -116,7 +131,7 @@ const App = (() => {
                     </div>
                 `;
                 
-                marker.bindPopup(popupContent, { className: 'custom-popup' });
+                marker.bindPopup(popupContent, { className: 'custom-popup', offset: [0, -32] });
 
                 marker.on('click', (e) => {
                     L.DomEvent.stopPropagation(e);
@@ -133,7 +148,8 @@ const App = (() => {
         const map = MapUI.init();
         const gyms = await DataFetcher.fetchGyms();
         MarkerLogic.renderMarkers(map, gyms);
-        MapUI.loadDistricts();
+        // 先顯示標記後再加載行政區
+        setTimeout(() => MapUI.loadDistricts(), 500);
     }
 
     return { init };
