@@ -1,59 +1,60 @@
 /**
- * Taipei Climbing Gym Map Application - Enhanced Version
+ * Taipei Climbing Gym Map - Final Robust Version
  */
 
 const App = (() => {
-    // 1. Data Fetching
     const DataFetcher = {
         async fetchGyms() {
             try {
                 const response = await fetch('climbing-gyms.json');
-                if (!response.ok) throw new Error('Gyms JSON not found');
                 return await response.json();
             } catch (error) {
-                console.error('Error fetching gyms:', error);
+                console.error('Gyms load failed:', error);
                 return [];
             }
         },
         async fetchTaipeiGeoJSON() {
             try {
-                // 使用新的可靠 GeoJSON 來源
+                // 使用更穩定的圖資來源
                 const response = await fetch('https://raw.githubusercontent.com/wenlab501/Rt/main/TPE_town.geojson');
-                if (!response.ok) throw new Error('GeoJSON source not found');
                 return await response.json();
             } catch (error) {
-                console.warn('GeoJSON load failed, highlighting disabled:', error.message);
+                console.warn('GeoJSON failed:', error);
                 return null;
             }
         }
     };
 
-    // 2. Map UI Components
     const MapUI = {
         map: null,
         districtLayer: null,
         
         init() {
             this.map = L.map('map', {
-                maxBounds: [[24.85, 121.30], [25.30, 121.80]],
+                maxBounds: [[24.90, 121.30], [25.25, 121.75]],
                 minZoom: 11
             }).setView([25.045, 121.53], 12);
 
-            // 使用 CartoDB Light 底圖
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap &copy; CARTO'
+                attribution: '&copy; OpenStreetMap'
             }).addTo(this.map);
             
             return this.map;
         },
 
-        getDistrictStyle(isHighlight) {
+        // 正規化名稱：將 臺 改為 台，確保匹配
+        normalizeName(name) {
+            if (!name) return "";
+            return name.replace(/臺/g, "台");
+        },
+
+        getStyle(isHighlight) {
             return {
-                fillColor: isHighlight ? '#e74c3c' : '#34495e',
+                fillColor: isHighlight ? '#e74c3c' : '#bdc3c7',
                 weight: isHighlight ? 3 : 1,
-                opacity: 0.8,
-                color: isHighlight ? '#c0392b' : '#bdc3c7',
-                fillOpacity: isHighlight ? 0.4 : 0.05
+                opacity: 0.5,
+                color: isHighlight ? '#c0392b' : '#95a5a6',
+                fillOpacity: isHighlight ? 0.3 : 0.02 // 平時幾乎透明，高亮才顯色
             };
         },
 
@@ -63,41 +64,37 @@ const App = (() => {
 
             const self = this;
             this.districtLayer = L.geoJSON(geoData, {
-                style: function(feature) {
-                    return self.getDistrictStyle(false);
-                },
-                onEachFeature: function(feature, layer) {
-                    // 注意：此 GeoJSON 的屬性名稱為 TOWNNAME
-                    const name = feature.properties.TOWNNAME || feature.properties.T_Name || "未知區域";
-                    layer.bindTooltip(name, { sticky: true, direction: 'top' });
+                style: () => self.getStyle(false),
+                onEachFeature: (feature, layer) => {
+                    const name = feature.properties.TOWNNAME || feature.properties.T_Name || "";
+                    layer.bindTooltip(name, { sticky: true });
                 }
             }).addTo(this.map);
+            
+            this.districtLayer.bringToBack(); // 確保在標記點下方
         },
 
         highlightDistrict(districtName) {
             if (!this.districtLayer) return;
-            
+            const targetName = this.normalizeName(districtName);
+
             this.districtLayer.eachLayer(layer => {
-                const props = layer.feature.properties;
-                const name = props.TOWNNAME || props.T_Name;
-                
-                if (name === districtName) {
-                    layer.setStyle(this.getDistrictStyle(true));
-                    layer.bringToBack();
+                const geoName = this.normalizeName(layer.feature.properties.TOWNNAME || layer.feature.properties.T_Name);
+                if (geoName === targetName) {
+                    layer.setStyle(this.getStyle(true));
                 } else {
-                    layer.setStyle(this.getDistrictStyle(false));
+                    layer.setStyle(this.getStyle(false));
                 }
             });
         },
 
         resetHighlight() {
             if (this.districtLayer) {
-                this.districtLayer.setStyle(this.getDistrictStyle(false));
+                this.districtLayer.setStyle(this.getStyle(false));
             }
         }
     };
 
-    // 3. Markers & Popups
     const MarkerLogic = {
         renderMarkers(map, gyms) {
             gyms.forEach(gym => {
@@ -132,15 +129,10 @@ const App = (() => {
         }
     };
 
-    // 4. Main Controller
     async function init() {
         const map = MapUI.init();
-        
-        // 先顯示標記點
         const gyms = await DataFetcher.fetchGyms();
         MarkerLogic.renderMarkers(map, gyms);
-        
-        // 非同步載入行政區邊界
         MapUI.loadDistricts();
     }
 
