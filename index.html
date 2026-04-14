@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台北市攀岩館互動地圖 | Taipei Climbing Gym Map</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>台北市攀岩館互動地圖</h1>
+        <p>探索台北市最受歡迎的抱石與上攀場館</p>
+    </header>
+
+    <main id="map-container">
+        <!-- Leaflet Map will be injected here -->
+        <div id="map"></div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 台北攀岩地圖專案 | 讓攀岩更貼近生活</p>
+    </footer>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Application Logic -->
+    <script src="script.js"></script>
+</body>
+</html>

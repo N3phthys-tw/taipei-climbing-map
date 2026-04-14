@@ -1,0 +1,67 @@
+[
+  {
+    "id": "redpoint-beitou",
+    "name": "小岩館-北投 (RedPoint-Beitou)",
+    "location": {
+      "lat": 25.132,
+      "lng": 121.498
+    },
+    "address": "台北市北投區中央南路一段129號",
+    "phone": "02-2894-1329",
+    "website": "https://www.redpointclimbing.com/",
+    "type": ["抱石 (Bouldering)"],
+    "operatingHours": "平日 13:00-22:00, 假日 10:00-20:00"
+  },
+  {
+    "id": "pogo-climbing",
+    "name": "POGO 攀岩館",
+    "location": {
+      "lat": 25.045,
+      "lng": 121.615
+    },
+    "address": "新北市新莊區建國一路122號 (雖然在新莊，但捷運可達，作為範例資料)",
+    "phone": "02-2908-1212",
+    "website": "http://www.pogoclimbing.com/",
+    "type": ["抱石 (Bouldering)"],
+    "operatingHours": "平日 13:00-23:00, 假日 10:00-22:00"
+  },
+  {
+    "id": "t-up-wanhua",
+    "name": "T-UP 萬華店 (T-UP Wanhua)",
+    "location": {
+      "lat": 25.034,
+      "lng": 121.499
+    },
+    "address": "台北市萬華區大理街160巷20弄30號",
+    "phone": "02-2308-8250",
+    "website": "https://www.tupclimbing.com/",
+    "type": ["抱石 (Bouldering)"],
+    "operatingHours": "平日 13:00-23:00, 假日 10:00-20:00"
+  },
+  {
+    "id": "yideng-climbing",
+    "name": "一登攀岩館 (Yideng Climbing Gym)",
+    "location": {
+      "lat": 25.051,
+      "lng": 121.531
+    },
+    "address": "台北市中山區吉林路20號B1",
+    "phone": "02-2542-8809",
+    "website": "https://www.facebook.com/yidengclimbing/",
+    "type": ["抱石 (Bouldering)"],
+    "operatingHours": "平日 13:00-23:00, 假日 10:00-21:00"
+  },
+  {
+    "id": "civic-bouldergym",
+    "name": "市民攀岩館 (Civic Boulder Gym)",
+    "location": {
+      "lat": 25.048,
+      "lng": 121.545
+    },
+    "address": "台北市中山區市民大道三段198號",
+    "phone": "02-2771-5555",
+    "website": "http://www.civicbouldergym.com/",
+    "type": ["抱石 (Bouldering)"],
+    "operatingHours": "平日 10:00-22:30, 假日 10:00-20:00"
+  }
+]
