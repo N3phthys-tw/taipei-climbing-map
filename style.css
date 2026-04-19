@@ -1,201 +1,264 @@
 /* 
-   Taipei Climbing Map - Layout Doctor & Japanese Design Refined
-   Focus: Full-screen Map, Floating UI, Restored Data Tags
+   Taipei Climbing Map - Japanese Craftsmanship UI
+   Visual Guide: White #FFFFFF, Light Gray #F8F9FA, Border #EDEDED
 */
 
 :root {
-    --jp-white: rgba(255, 255, 255, 0.85);
-    --jp-border: #F0F0F0;
-    --jp-text: #4A4A4A;
+    --jp-white: #FFFFFF;
+    --jp-bg: #F8F9FA;
+    --jp-border: #EDEDED;
+    --jp-text-main: #4A4A4A;
+    --jp-text-soft: #888888;
     --jp-accent: #8E9775; /* Matcha Green */
     --jp-blue: #A2B5BB;   /* Morandi Blue */
-    --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.06);
     --radius-m: 12px;
+    --radius-s: 8px;
+    --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    font-family: 'Noto Sans TC', sans-serif;
-    overflow: hidden;
-}
+html, body { height: 100%; margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; background: var(--jp-bg); overflow: hidden; }
 
-/* Fullscreen Map Layer */
-#map-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-}
+/* Background Map */
+#map-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+#map { width: 100%; height: 100%; }
 
-#map {
-    width: 100%;
-    height: 100%;
-}
-
-/* Minimal Japanese Banner */
+/* Floating Header */
 header {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 60px;
-    background: var(--jp-white);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    z-index: 1001;
+    z-index: 1005;
     display: flex;
     align-items: center;
     padding: 0 30px;
     box-sizing: border-box;
     border-bottom: 1px solid var(--jp-border);
 }
+header h1 { font-size: 1rem; font-weight: 600; color: var(--jp-text-main); letter-spacing: 1px; }
 
-header h1 {
-    font-size: 1.2rem;
-    font-weight: 500;
-    letter-spacing: 2px;
-    color: var(--jp-text);
-}
-
-/* Floating Navigation Panel (Left-Top below Banner) */
-#nav-summary {
-    position: absolute;
-    top: 75px;
-    left: 20px;
-    width: 320px;
-    background: #FFF;
-    border-radius: 15px;
-    box-shadow: var(--shadow-light);
-    z-index: 1002;
-    padding: 15px 20px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid #EDEDED;
-}
-
-#nav-summary.hidden {
-    opacity: 0;
-    transform: translateY(-10px);
-    pointer-events: none;
-}
-
-.nav-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.nav-info {
-    display: flex;
-    gap: 15px;
-}
-
-#nav-time { font-size: 1.1rem; font-weight: 600; color: var(--jp-accent); }
-#nav-dist { font-size: 0.9rem; color: #999; display: flex; align-items: center; }
-
-#nav-close {
-    background: #F5F5F5;
-    border: none;
-    border-radius: 50%;
-    width: 28px;
-    height: 28px;
-    cursor: pointer;
-    color: #999;
-}
-
-/* Sidebar: Floating Right Panel */
+/* Sidebar: Gym Discovery Card System */
 #sidebar {
     position: absolute;
-    top: 75px;
-    right: 20px;
+    top: 80px;
+    left: 20px;
     bottom: 20px;
-    width: 340px;
-    background: var(--jp-white);
-    backdrop-filter: blur(8px);
-    border-radius: 20px;
-    box-shadow: var(--shadow-light);
+    width: 330px;
+    background: transparent; /* Card-based layout */
     z-index: 1000;
     display: flex;
     flex-direction: column;
-    border: 1px solid rgba(255,255,255,0.5);
-    overflow: hidden;
 }
 
 .sidebar-header {
-    padding: 25px 20px 15px;
-}
-
-.sidebar-header h2 {
-    font-size: 0.85rem;
-    color: #BBB;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    background: var(--jp-white);
+    padding: 25px 20px;
+    border-radius: 16px;
+    box-shadow: var(--shadow-soft);
     margin-bottom: 15px;
+    border: 1px solid var(--jp-border);
 }
 
+.sidebar-header h2 { font-size: 0.8rem; color: var(--jp-text-soft); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
+
+/* Refined Search */
+.search-box { position: relative; margin-bottom: 15px; }
+.search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--jp-blue); }
 .search-box input {
-    background: #FFF;
-    border: 1px solid #EEE;
-    padding: 10px 15px 10px 35px;
-    border-radius: 10px;
     width: 100%;
-    box-sizing: border-box;
+    padding: 12px 12px 12px 38px;
+    border: 1px solid var(--jp-border);
+    border-radius: var(--radius-s);
+    background: #FAFAFA;
     font-size: 0.9rem;
+    box-sizing: border-box;
+    transition: all 0.3s;
 }
+.search-box input:focus { background: #FFF; border-color: var(--jp-blue); outline: none; }
 
-.search-box i { left: 12px; color: var(--jp-blue); }
-
-#gym-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 10px 15px;
+/* Custom Checkbox */
+.type-checkboxes { display: flex; gap: 15px; }
+.type-checkboxes label { 
+    font-size: 0.85rem; 
+    color: var(--jp-text-main); 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    cursor: pointer; 
 }
-
-.gym-list-item {
-    padding: 15px;
-    background: #FFF;
-    border-radius: 12px;
-    margin-bottom: 10px;
+.type-filter { 
+    width: 16px; height: 16px; 
+    accent-color: var(--jp-accent); 
     cursor: pointer;
-    transition: all 0.2s;
 }
 
-.gym-list-item:hover {
-    transform: translateX(-5px);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+/* Gym List Items as Discrete Cards */
+#gym-list { flex: 1; overflow-y: auto; padding-right: 5px; }
+.gym-list-item {
+    background: var(--jp-white);
+    border: 1px solid var(--jp-border);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-soft);
+}
+.gym-list-item:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.05); border-color: var(--jp-blue); }
+.gym-list-item h4 { margin: 0 0 8px 0; font-size: 1rem; color: var(--jp-text-main); font-weight: 600; }
+.gym-list-item p { margin: 0; font-size: 0.8rem; color: var(--jp-text-soft); }
+
+/* Navigation Summary Floating Top-Left */
+#nav-summary {
+    position: absolute;
+    top: 80px;
+    left: 370px;
+    background: var(--jp-white);
+    padding: 15px 22px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    z-index: 1004;
+    min-width: 220px;
+    border: 1px solid var(--jp-border);
+}
+#nav-summary.hidden { display: none; }
+.nav-header { font-size: 0.75rem; font-weight: 600; color: var(--jp-accent); margin-bottom: 10px; text-transform: uppercase; }
+.nav-content { display: flex; justify-content: space-between; align-items: center; }
+#nav-time { font-size: 1.3rem; font-weight: 600; color: var(--jp-text-main); }
+#nav-dist { font-size: 0.85rem; color: var(--jp-text-soft); }
+
+/* Layer Switcher & Custom Controls Refinement */
+.map-ctrl-group {
+    position: absolute;
+    top: 80px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 1010;
 }
 
-.gym-list-item h4 { margin: 0 0 5px; font-size: 0.95rem; font-weight: 500; }
-.gym-list-item p { margin: 0; font-size: 0.75rem; color: #999; }
-
-/* Restored Gym Type Tags */
-.tag-container { display: flex; gap: 5px; margin-top: 8px; }
-.tag-bouldering, .tag-lead {
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-size: 0.65rem;
-    font-weight: 500;
-}
-.tag-bouldering { background: #E3F2FD; color: #5C92B1; }
-.tag-lead { background: #F1F8E9; color: #8E9775; }
-
-/* Tool Buttons Style */
 .geo-btn, .style-btn {
-    background: #FFF !important;
-    color: var(--jp-text) !important;
-    border: 1px solid #EEE !important;
-    box-shadow: var(--shadow-light) !important;
+    position: relative !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    width: 44px !important;
+    height: 44px !important;
+    border: 1px solid var(--jp-border) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--shadow-soft) !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    color: var(--jp-accent) !important; /* Matcha Green for icons */
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.map-style-ctrl { bottom: 85px; right: 80px; } /* Repositioned to avoid sidebar */
-.geo-btn { position: absolute; bottom: 30px; right: 80px; z-index: 1001; }
-
-/* Responsive Mobile */
-@media (max-width: 768px) {
-    #sidebar { width: calc(100% - 40px); height: 35%; top: auto; right: 20px; left: 20px; }
-    #nav-summary { width: calc(100% - 40px); }
-    .geo-btn, .map-style-ctrl { right: 20px; }
+.geo-btn:active, .style-btn:active {
+    transform: scale(0.92);
+    background: rgba(255, 255, 255, 1) !important;
 }
+
+.style-menu {
+    position: absolute;
+    top: 0;
+    right: 55px;
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: var(--radius-m);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    width: 140px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    animation: menuFadeIn 0.2s ease-out;
+}
+
+@keyframes menuFadeIn {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.style-option {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    color: var(--jp-text-main);
+    border-radius: 8px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.style-option:hover {
+    background: rgba(142, 151, 117, 0.1);
+    color: var(--jp-accent);
+}
+
+.style-option.active {
+    background: var(--jp-accent);
+    color: #FFF;
+}
+
+/* Navigation Row Refinement */
+.nav-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    white-space: nowrap;
+}
+
+#nav-time, #nav-dist {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--jp-text-main);
+}
+
+#nav-dist {
+    color: var(--jp-text-soft);
+    border-left: 1px solid var(--jp-border);
+    padding-left: 12px;
+}
+
+.nav-header i {
+    margin-right: 6px;
+    color: var(--jp-accent);
+}
+
+/* InfoWindow Custom Styling */
+.custom-popup .leaflet-popup-content-wrapper { border-radius: 16px; padding: 0; overflow: hidden; box-shadow: 0 15px 45px rgba(0,0,0,0.1); }
+.gym-detail-card { width: 290px; }
+.info-accent-bar { height: 4px; width: 100%; background: var(--jp-blue); }
+.gym-detail-header { padding: 20px 20px 10px; }
+.gym-detail-body { padding: 0 20px 20px; line-height: 1.6; }
+
+.detail-info-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 0.85rem; color: #555; }
+.detail-info-row i { margin-top: 5px; color: var(--jp-blue); width: 14px; text-align: center; }
+
+.btn-primary { 
+    background: var(--jp-text-main); 
+    color: white; 
+    border: none; 
+    padding: 12px; 
+    border-radius: 10px; 
+    width: 100%; 
+    margin-top: 15px; 
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-primary:hover { background: #333; }
+
+/* Tags */
+.tag-container { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.tag-bouldering { background: #E1F5FE; color: #0288D1; padding: 3px 10px; border-radius: 20px; font-size: 0.65rem; font-weight: 600; }
+.tag-lead { background: #F1F8E9; color: #558B2F; padding: 3px 10px; border-radius: 20px; font-size: 0.65rem; font-weight: 600; }
+
+.hidden { display: none !important; }
