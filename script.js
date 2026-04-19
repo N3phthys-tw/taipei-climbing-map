@@ -111,7 +111,7 @@ const App = (() => {
                             <span class="time">${navData ? navData.time : '--'} MIN</span>
                             <span class="dist">${navData ? navData.dist : '--'} KM</span>
                         </div>
-                        <i class="fas fa-car" style="color:var(--accent-bouldering);"></i>
+                        <i class="fas fa-car" style="color:var(--jp-accent);"></i>
                     </div>
 
                     <div class="btn-group">
@@ -127,7 +127,7 @@ const App = (() => {
         }
     };
 
-    // 3. Navigation & Spotlight Engine
+    // 3. Navigation & Geolocation
     const NavigationManager = {
         init() {
             document.getElementById('nav-close').addEventListener('click', () => this.reset());
@@ -137,7 +137,7 @@ const App = (() => {
             if (userMarker) mapInstance.removeLayer(userMarker);
             userMarker = L.circleMarker([lat, lng], {
                 radius: 8, fillColor: '#e74c3c', color: '#fff', weight: 2, fillOpacity: 0.8
-            }).addTo(mapInstance).bindPopup("YOU ARE HERE").openPopup();
+            }).addTo(mapInstance).bindPopup("YOU").openPopup();
         },
         calculateRoute(gymId, lat, lng, district) {
             if (!userLocation) { alert("請先開啟定位。"); return; }
@@ -149,7 +149,7 @@ const App = (() => {
                 show: false, 
                 addWaypoints: false,
                 fitSelectedRoutes: true,
-                lineOptions: { styles: [{ color: 'var(--accent-action)', opacity: 0.8, weight: 5 }] },
+                lineOptions: { styles: [{ color: 'var(--jp-blue)', opacity: 0.8, weight: 6 }] },
                 createMarker: () => null
             }).addTo(mapInstance);
 
@@ -158,10 +158,10 @@ const App = (() => {
                 const time = Math.round(summary.totalTime / 60);
                 const dist = (summary.totalDistance / 1000).toFixed(1);
                 
-                // Show Floating Card
+                // Show Floating Panel
                 const badge = document.getElementById('nav-summary');
-                document.getElementById('nav-time').textContent = `${time} 分鐘`;
-                document.getElementById('nav-dist').textContent = `${dist} 公里`;
+                document.getElementById('nav-time').textContent = `${time} MIN`;
+                document.getElementById('nav-dist').innerHTML = `<i class="fas fa-route" style="margin-right:5px;"></i> ${dist} KM`;
                 badge.classList.remove('hidden');
                 
                 // Update InfoWindow
@@ -171,13 +171,13 @@ const App = (() => {
                     navSection.innerHTML = `
                         <div class="nav-summary-mini">
                             <span class="time">${time} MIN</span>
-                            <span class="dist">${dist} KM (自您的位置)</span>
+                            <span class="dist">${dist} KM</span>
                         </div>
-                        <i class="fas fa-car" style="color:var(--accent-bouldering);"></i>
+                        <i class="fas fa-car" style="color:var(--jp-accent);"></i>
                     `;
                     if (currentOpenedMarker) currentOpenedMarker.getPopup().update();
                 }
-                mapInstance.fitBounds(L.latLngBounds(e.routes[0].coordinates), { padding: [80, 80] });
+                mapInstance.fitBounds(L.latLngBounds(e.routes[0].coordinates), { padding: [100, 100] });
             });
         },
         reset() {
@@ -199,7 +199,7 @@ const App = (() => {
         renderList(gyms) {
             const container = document.getElementById('gym-list');
             if (gyms.length === 0) {
-                container.innerHTML = '<div style="padding:40px; text-align:center; color:#CCC;"><i class="fas fa-wind" style="font-size:2rem; margin-bottom:10px;"></i><br>NO RESULTS</div>';
+                container.innerHTML = '<div style="padding:40px; text-align:center; color:#CCC;">NO RESULTS</div>';
                 return;
             }
 
@@ -322,7 +322,7 @@ const App = (() => {
             return {
                 fillColor: isTarget ? 'transparent' : '#000',
                 fillOpacity: activeDistrict ? (isTarget ? 0 : 0.45) : 0,
-                color: isTarget ? 'var(--accent-bouldering)' : 'transparent',
+                color: isTarget ? 'var(--jp-blue)' : 'transparent',
                 weight: isTarget ? 3 : 0
             };
         },
