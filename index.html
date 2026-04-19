@@ -7,6 +7,11 @@
     <link rel="icon" href="data:,">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- Leaflet MarkerCluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,18 +20,38 @@
         <p>探索台北市最受歡迎的抱石與上攀場館</p>
     </header>
 
-    <main id="map-container">
-        <!-- Leaflet Map will be injected here -->
-        <div id="map"></div>
-    </main>
+    <div id="app-container">
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <h2>尋找場館</h2>
+                <div class="filters">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-input" placeholder="搜尋行政區或場館...">
+                    </div>
+                    <div class="type-checkboxes">
+                        <label><input type="checkbox" class="type-filter" value="抱石" checked> 抱石</label>
+                        <label><input type="checkbox" class="type-filter" value="上攀" checked> 上攀</label>
+                    </div>
+                </div>
+            </div>
+            <div id="gym-list">
+                <!-- Gym list items will be injected here -->
+            </div>
+        </aside>
 
-    <footer>
-        <p>&copy; 2024 台北攀岩地圖專案 | 讓攀岩更貼近生活</p>
-    </footer>
+        <main id="map-container">
+            <!-- Leaflet Map will be injected here -->
+            <div id="map"></div>
+            <button id="geo-btn" class="geo-btn" title="我的位置"><i class="fas fa-location-arrow"></i></button>
+        </main>
+    </div>
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Leaflet MarkerCluster JS -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     <!-- Application Logic -->
-    <script src="script.js?v=2"></script>
+    <script src="script.js?v=3"></script>
 </body>
 </html>
