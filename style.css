@@ -1,638 +1,224 @@
-/* Global Styles */
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    color: #333;
-    background-color: #f4f4f9;
+/* 
+   Taipei Climbing Map - Japanese Minimalist Style (日系清新風格)
+   Palette: Warm White, Charcoal Gray, Morandi Blue, Matcha Green
+*/
+
+:root {
+    --bg-main: #FDFDFD;
+    --bg-sub: #F8F9FA;
+    --text-primary: #4A4A4A;
+    --text-secondary: #7F8C8D;
+    --accent-bouldering: #A2B5BB; /* Morandi Blue */
+    --accent-lead: #8E9775;       /* Matcha Green */
+    --accent-action: #6D8299;
+    --glass-white: rgba(255, 255, 255, 0.85);
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
+    --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.08);
+    --radius-l: 16px;
+    --radius-m: 12px;
+    --radius-pill: 20px;
 }
 
+body {
+    font-family: 'Noto Sans TC', -apple-system, sans-serif;
+    margin: 0;
+    height: 100vh;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    overflow: hidden;
+}
+
+/* Floating Header */
 header {
-    background-color: #2c3e50;
-    color: white;
-    padding: 1rem;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    z-index: 10;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    background: var(--glass-white);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 12px 25px;
+    border-radius: var(--radius-l);
+    box-shadow: var(--shadow-soft);
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid rgba(255,255,255,0.3);
 }
 
 header h1 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+    color: var(--text-primary);
 }
 
-header p {
-    margin: 0.5rem 0 0;
-    font-size: 0.9rem;
-    opacity: 0.8;
-}
+header p { display: none; } /* Simplified for aesthetics */
 
-/* App Layout */
+/* Layout */
 #app-container {
     display: flex;
-    flex: 1;
-    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
 }
 
-/* Sidebar Styles */
+/* Sidebar Styling */
 #sidebar {
-    width: 300px;
-    background: #fff;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    width: 320px;
+    background: var(--bg-main);
+    padding-top: 100px; /* Space for floating header */
     display: flex;
     flex-direction: column;
+    border-right: 1px solid #F0F0F0;
     z-index: 5;
+    transition: all 0.3s ease;
 }
 
 .sidebar-header {
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-    background: #fafafa;
+    padding: 20px;
+    background: transparent;
 }
 
 .sidebar-header h2 {
-    margin: 0 0 10px;
-    font-size: 1.2rem;
-    color: #2c3e50;
-}
-
-.filters {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.search-box {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.search-box i {
-    position: absolute;
-    left: 10px;
-    color: #999;
     font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
 }
 
+/* Minimal Search Box */
 .search-box input {
+    background: var(--bg-sub);
+    border: none;
+    padding: 12px 15px 12px 40px;
+    border-radius: var(--radius-pill);
+    font-size: 0.85rem;
+    color: var(--text-primary);
     width: 100%;
-    padding: 10px 10px 10px 32px;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    outline: none;
-    transition: border-color 0.2s;
     box-sizing: border-box;
+    transition: all 0.3s;
 }
 
 .search-box input:focus {
-    border-color: #3498db;
-    box-shadow: 0 0 5px rgba(52, 152, 219, 0.2);
+    background: #FFF;
+    box-shadow: 0 0 0 2px var(--accent-bouldering);
 }
 
-.type-checkboxes {
-    display: flex;
-    gap: 15px;
-    padding-left: 5px;
-}
+.search-box i { left: 15px; color: var(--accent-bouldering); }
 
+/* Custom Checkboxes */
+.type-checkboxes { margin-top: 15px; gap: 12px; }
 .type-checkboxes label {
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    cursor: pointer;
-    color: #555;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--text-secondary);
 }
 
-.type-checkboxes input[type="checkbox"] {
-    cursor: pointer;
-}
-
-#gym-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0;
-}
-
+/* Gym List Items */
+#gym-list { padding: 10px; }
 .gym-list-item {
+    border-bottom: none;
+    margin-bottom: 8px;
     padding: 15px;
-    border-bottom: 1px solid #eee;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    border-radius: var(--radius-m);
+    transition: all 0.25s ease;
 }
 
 .gym-list-item:hover {
-    background-color: #f9f9f9;
+    background: var(--bg-sub);
+    transform: translateY(-2px);
 }
 
 .gym-list-item h4 {
-    margin: 0 0 5px;
-    color: #2980b9;
-    font-size: 1rem;
-}
-
-.gym-list-item p {
-    margin: 0 0 5px;
-    font-size: 0.85rem;
-    color: #666;
-}
-
-/* Map Container */
-#map-container {
-    flex: 1;
-    position: relative;
-}
-
-#map {
-    height: 100%;
-    width: 100%;
-    z-index: 1;
-}
-
-/* Geolocation Button */
-.geo-btn {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background: white;
-    border: 2px solid rgba(0,0,0,0.2);
-    background-clip: padding-box;
-    width: 44px;
-    height: 44px;
-    border-radius: 4px;
-    cursor: pointer;
-    z-index: 1000;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.65);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #333;
-    font-size: 1.2rem;
-    transition: background-color 0.2s;
-}
-
-.geo-btn:hover {
-    background: #f4f4f4;
-}
-
-.geo-btn.active {
-    color: #3498db;
-}
-
-/* Popup Styles */
-.custom-popup .leaflet-popup-content-wrapper {
-    border-radius: 8px;
-    padding: 5px;
-}
-
-.gym-info-window {
-    max-width: 250px;
-}
-
-.gym-info-window h3 {
-    margin: 0 0 10px;
-    color: #2980b9;
-    font-size: 1.1rem;
-}
-
-.gym-info-window p {
-    margin: 5px 0;
-    font-size: 0.9rem;
-    line-height: 1.4;
-}
-
-.gym-info-window .label {
-    font-weight: bold;
-    color: #555;
-}
-
-.gym-info-window a {
-    display: inline-block;
-    margin-top: 10px;
-    color: white;
-    background-color: #3498db;
-    padding: 5px 10px;
-    text-decoration: none;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    text-align: center;
-}
-
-.gym-info-window a:hover {
-    background-color: #2980b9;
-}
-
-/* Tags */
-.tag-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin-top: 5px;
-}
-
-.tag-bouldering {
-    background-color: #e67e22;
-    color: white;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 0.75rem;
-}
-
-.tag-lead {
-    background-color: #27ae60;
-    color: white;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 0.75rem;
-}
-
-/* Routing Panel Customization */
-.leaflet-routing-container {
-    background-color: white;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    font-size: 0.85rem;
-    max-height: 300px;
-    overflow-y: auto;
-    width: 280px !important;
-}
-
-.route-info-badge {
-    background: #2c3e50;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-weight: bold;
-    margin-top: 8px;
-    display: inline-block;
-}
-
-/* Custom Black Marker */
-.origin-marker-icon {
-    background: none;
-    border: none;
-}
-
-.origin-marker-icon i {
-    color: #000;
-    font-size: 2rem;
-    text-shadow: 0 0 3px #fff;
-}
-
-/* InfoWindow Navigation Button */
-.nav-btn {
-    display: block;
-    margin-top: 10px;
-    background-color: #000;
-    color: white;
-    text-align: center;
-    padding: 8px;
-    border-radius: 4px;
-    text-decoration: none;
-    font-size: 0.85rem;
-    cursor: pointer;
-    border: none;
-    width: 100%;
-}
-
-.nav-btn:hover {
-    background-color: #333;
-}
-
-/* Navigation Summary Badge (Mini-bar < 80px) */
-.nav-summary {
-    height: 60px;
-    background: #2c3e50;
-    color: white;
-    display: flex;
-    align-items: center;
-    padding: 0 15px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    transition: transform 0.3s ease-out;
-    z-index: 100;
-}
-
-.nav-summary.hidden {
-    display: none;
-}
-
-.nav-content {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    align-items: center;
-}
-
-.nav-info {
-    display: flex;
-    flex-direction: column;
-}
-
-#nav-time {
-    font-size: 1.1rem;
-    font-weight: bold;
-}
-
-#nav-dist {
-    font-size: 0.8rem;
-    opacity: 0.8;
-}
-
-#nav-close {
-    background: rgba(255,255,255,0.2);
-    border: none;
-    color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-#nav-close:hover {
-    background: rgba(255,255,255,0.4);
-}
-
-/* Spotlight Style */
-.spotlight-mask {
-    pointer-events: none;
-}
-
-/* Hide the default Leaflet Routing panel */
-.leaflet-routing-container {
-    display: none !important;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    #app-container {
-        flex-direction: column-reverse;
-    }
-    
-    #sidebar {
-        width: 100%;
-        height: 40%;
-        box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-    }
-    
-    .nav-summary {
-        position: absolute;
-        top: -60px;
-        width: 100%;
-        box-sizing: border-box;
-    }
-    
-    #map-container {
-        height: 60%;
-        flex: none;
-    }
-}
-
-/* Rich InfoWindow Layout */
-.custom-popup .leaflet-popup-content-wrapper {
-    width: 300px;
-    padding: 0;
-    overflow: hidden;
-}
-
-.custom-popup .leaflet-popup-content {
-    margin: 0;
-    width: 300px !important;
-}
-
-.gym-detail-card {
-    display: flex;
-    flex-direction: column;
-}
-
-.gym-detail-header {
-    background: #f8f9fa;
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-}
-
-.gym-detail-header h2 {
-    margin: 0;
-    font-size: 1.2rem;
-    color: #2c3e50;
-}
-
-.gym-detail-body {
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.detail-row {
-    display: flex;
-    gap: 10px;
-    font-size: 0.85rem;
-    line-height: 1.4;
-}
-
-.detail-row .icon {
-    width: 20px;
-    color: #3498db;
-    text-align: center;
-}
-
-.detail-row .content {
-    flex: 1;
-}
-
-.detail-row .label {
-    font-weight: bold;
-    color: #7f8c8d;
-    margin-right: 5px;
-}
-
-/* Integrated Navigation Section */
-.gym-detail-nav {
-    background: #ebf5fb;
-    padding: 10px 15px;
-    border-top: 1px solid #d4e6f1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.nav-summary-mini {
-    display: flex;
-    flex-direction: column;
-}
-
-.nav-summary-mini .time {
-    font-weight: bold;
-    color: #2980b9;
     font-size: 0.95rem;
-}
-
-.nav-summary-mini .dist {
-    font-size: 0.75rem;
-    color: #7f8c8d;
-}
-
-.btn-group {
-    display: flex;
-    gap: 8px;
-    padding: 0 15px 15px;
-}
-
-.btn-primary, .btn-secondary {
-    flex: 1;
-    padding: 8px;
-    border-radius: 4px;
-    text-align: center;
-    text-decoration: none;
-    font-size: 0.85rem;
     font-weight: 500;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+}
+
+.gym-list-item p { font-size: 0.75rem; color: var(--text-secondary); }
+
+/* Pill Tags */
+.tag-bouldering, .tag-lead {
+    border-radius: var(--radius-pill);
+    padding: 2px 10px;
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+.tag-bouldering { background: #E8F0F2; color: var(--accent-bouldering); }
+.tag-lead { background: #EEF2E6; color: var(--accent-lead); }
+
+/* Floating Navigation Card */
+#nav-summary {
+    position: absolute;
+    bottom: 30px;
+    left: 340px; /* Right of sidebar */
+    background: var(--glass-white);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-l);
+    box-shadow: var(--shadow-medium);
+    padding: 15px 20px;
+    width: auto;
+    min-width: 200px;
+    z-index: 1000;
+    border: 1px solid rgba(255,255,255,0.4);
+    animation: fadeIn 0.4s ease-out;
+}
+
+.nav-content { gap: 20px; }
+#nav-time { font-size: 1.2rem; color: var(--accent-action); }
+#nav-dist { color: var(--text-secondary); }
+
+/* Map & Tools */
+#map-container { flex: 1; position: relative; }
+#map { background: var(--bg-sub); }
+
+.geo-btn, .style-btn {
+    background: var(--glass-white) !important;
+    backdrop-filter: blur(5px);
+    border: none !important;
+    border-radius: 50% !important;
+    box-shadow: var(--shadow-soft) !important;
+    color: var(--text-primary) !important;
+    width: 48px !important;
+    height: 48px !important;
+}
+
+.style-menu {
+    border-radius: var(--radius-m);
+    box-shadow: var(--shadow-medium);
     border: none;
-    cursor: pointer;
-    transition: background 0.2s;
+    bottom: 0;
+    right: 65px;
 }
 
-.btn-primary {
-    background: #3498db;
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #2980b9;
-}
-
-.btn-secondary {
-    background: #2c3e50;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: #1a252f;
-}
-
-.hidden {
-    display: none !important;
-}
-
-/* Rich Info Architecture Enhancements */
+/* Rich InfoWindow Refinement */
 .custom-popup .leaflet-popup-content-wrapper {
-    width: 300px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    border-radius: var(--radius-l);
+    background: var(--glass-white);
+    backdrop-filter: blur(10px);
 }
 
-.gym-detail-card h2 {
-    font-size: 1.3rem;
-    color: #2c3e50;
-    margin-bottom: 5px;
-    line-height: 1.2;
-}
+.gym-detail-header h2 { font-weight: 500; color: var(--text-primary); }
+.btn-primary { background: var(--accent-action); border-radius: var(--radius-pill); }
+.btn-secondary { background: var(--bg-sub); color: var(--text-primary); border-radius: var(--radius-pill); }
 
-.gym-detail-body {
-    padding-top: 5px;
-}
+/* Spotlight Engine */
+.spotlight-mask { transition: fill-opacity 0.6s ease; }
 
-.detail-row {
-    margin-bottom: 8px;
-    align-items: flex-start;
-}
-
-.detail-row .icon {
-    font-size: 1rem;
-    margin-top: 2px;
-}
-
-.gym-detail-nav {
-    margin: 10px 15px;
-    border-radius: 8px;
-    border: 1px solid #d4e6f1;
-    animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
+@keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-.btn-group {
-    padding: 0 15px 20px;
+/* Responsive Styles */
+@media (max-width: 768px) {
+    header { top: 10px; left: 10px; right: 10px; padding: 10px 15px; }
+    #sidebar { width: 100%; height: 40%; padding-top: 70px; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); }
+    #app-container { flex-direction: column-reverse; }
+    #nav-summary { bottom: 42%; left: 20px; right: 20px; min-width: 0; }
 }
-
-/* Sidebar Tag Enhancements */
-.gym-list-item .tag-container {
-    margin-top: 8px;
-}
-
-.tag-bouldering {
-    background-color: #3498db; /* Blue */
-}
-
-.tag-lead {
-    background-color: #27ae60; /* Green */
-}
-
-/* Map Style Switcher UI */
-.map-style-ctrl {
-    position: absolute;
-    bottom: 80px; /* Above Geolocation button */
-    right: 20px;
-    z-index: 1000;
-}
-
-.style-btn {
-    background: white;
-    border: 2px solid rgba(0,0,0,0.2);
-    width: 44px;
-    height: 44px;
-    border-radius: 4px;
-    cursor: pointer;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    color: #333;
-    transition: all 0.2s;
-}
-
-.style-btn:hover { background: #f4f4f4; }
-
-.style-menu {
-    position: absolute;
-    bottom: 0;
-    right: 55px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.2);
-    padding: 8px;
-    width: 140px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.style-option {
-    padding: 10px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #555;
-    transition: background 0.2s;
-}
-
-.style-option:hover {
-    background: #ebf5fb;
-    color: #3498db;
-}
-
-.style-option i { width: 20px; text-align: center; }
-
-.hidden { display: none !important; }

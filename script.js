@@ -1,6 +1,6 @@
 /**
- * Taipei Climbing Map - User-Driven Refactored Version
- * Focus: User Geolocation as default start + Fixed Sidebar Tags
+ * Taipei Climbing Map - Japanese Minimalist Edition
+ * Visual Theme: Low saturation, Airy layout, Glassmorphism
  */
 
 const App = (() => {
@@ -8,7 +8,7 @@ const App = (() => {
     let currentGyms = [];
     let mapInstance = null;
     let markerClusterGroup = null;
-    let userLocation = null; // Global Source of Truth
+    let userLocation = null;
     let userMarker = null;
     let routingControl = null;
     let spotlightLayer = null;
@@ -17,12 +17,12 @@ const App = (() => {
     let baseLayers = {};
     let currentBaseLayer = null;
 
-    // 0. Map Layer Manager
+    // 0. GIS & Layer Management
     const LayerManager = {
         init() {
             baseLayers = {
                 standard: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors'
+                    attribution: '&copy; OpenStreetMap'
                 }),
                 dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                     attribution: '&copy; CartoDB'
@@ -35,7 +35,6 @@ const App = (() => {
             const savedStyle = localStorage.getItem('map_style') || 'standard';
             this.switchLayer(savedStyle);
 
-            // UI Listeners
             const styleBtn = document.getElementById('style-btn');
             const styleMenu = document.getElementById('style-menu');
             
@@ -46,8 +45,7 @@ const App = (() => {
 
             document.querySelectorAll('.style-option').forEach(opt => {
                 opt.addEventListener('click', () => {
-                    const style = opt.dataset.style;
-                    this.switchLayer(style);
+                    this.switchLayer(opt.dataset.style);
                     styleMenu.classList.add('hidden');
                 });
             });
@@ -62,7 +60,7 @@ const App = (() => {
         }
     };
 
-    // 1. DataFetcher Module
+    // 1. Data Service
     const DataFetcher = {
         async fetchGyms() {
             try {
@@ -78,7 +76,7 @@ const App = (() => {
         }
     };
 
-    // 2. InfoWindow Module (Rich Template)
+    // 2. InfoWindow UI (Minimal Japanese Style)
     const InfoWindow = {
         render(gym, navData = null) {
             const typeList = Array.isArray(gym.type) ? gym.type : [gym.type];
@@ -96,98 +94,62 @@ const App = (() => {
                     <div class="gym-detail-body">
                         <div class="detail-row">
                             <span class="icon"><i class="fas fa-map-marker-alt"></i></span>
-                            <div class="content"><span class="label">地址:</span>${gym.address || gym.addr}</div>
+                            <div class="content">${gym.address || gym.addr}</div>
                         </div>
                         <div class="detail-row">
                             <span class="icon"><i class="fas fa-phone"></i></span>
-                            <div class="content"><span class="label">電話:</span>${gym.phone || '暫無資訊'}</div>
+                            <div class="content">${gym.phone || '暫無資訊'}</div>
                         </div>
                         <div class="detail-row">
                             <span class="icon"><i class="fas fa-clock"></i></span>
-                            <div class="content"><span class="label">營業:</span>${gym.operatingHours || '請洽場館'}</div>
+                            <div class="content">${gym.operatingHours || '請洽場館'}</div>
                         </div>
                     </div>
+                    
                     <div id="nav-section-${gym.id}" class="gym-detail-nav ${navData ? '' : 'hidden'}">
                         <div class="nav-summary-mini">
-                            <span class="time">${navData ? navData.time : '--'} 分鐘</span>
-                            <span class="dist">${navData ? navData.dist : '--'} km (自您的位置)</span>
+                            <span class="time">${navData ? navData.time : '--'} MIN</span>
+                            <span class="dist">${navData ? navData.dist : '--'} KM</span>
                         </div>
-                        <i class="fas fa-car" style="color:#3498db;"></i>
+                        <i class="fas fa-car" style="color:var(--accent-bouldering);"></i>
                     </div>
+
                     <div class="btn-group">
                         <button class="btn-primary" onclick="App.startNavigation('${gym.id}', ${gym.location.lat}, ${gym.location.lng}, '${gym.district}')">
-                            <i class="fas fa-directions"></i> 規劃路徑
+                            <i class="fas fa-location-arrow"></i> 規劃路徑
                         </button>
-                        <a href="${gym.website || '#'}" target="_blank" class="btn-secondary">官方網站</a>
+                        <a href="${gym.website || '#'}" target="_blank" class="btn-secondary">
+                            <i class="fas fa-external-link-alt"></i> 官網
+                        </a>
                     </div>
                 </div>
             `;
         }
     };
 
-    // 3. MapContainer Module (Spotlight)
-    const MapContainer = {
-        async init(centerCoord) {
-            mapInstance = L.map('map', { zoomControl: false }).setView(centerCoord, 14);
-            L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
-            
-            // Initializing LayerManager (Tiles)
-            LayerManager.init();
-
-            const districtData = await DataFetcher.fetchDistricts();
-            if (districtData) {
-                spotlightLayer = L.geoJSON(districtData, { 
-                    style: this.getSpotlightStyle, 
-                    className: 'spotlight-mask' 
-                }).addTo(mapInstance);
-            }
-            markerClusterGroup = L.markerClusterGroup({ disableClusteringAtZoom: 15 }).addTo(mapInstance);
-        },
-        getSpotlightStyle(feature) {
-            const props = feature.properties;
-            const townName = (props.TOWN || props.TNAME || "").replace(/\s/g, "");
-            const isTarget = activeDistrict && townName.includes(activeDistrict);
-            return {
-                fillColor: isTarget ? 'transparent' : '#000',
-                fillOpacity: activeDistrict ? (isTarget ? 0 : 0.6) : 0,
-                color: isTarget ? '#3498db' : 'transparent',
-                weight: isTarget ? 3 : 0,
-                transition: 'fill-opacity 0.4s ease'
-            };
-        },
-        updateSpotlight(districtName) {
-            activeDistrict = districtName;
-            if (spotlightLayer) spotlightLayer.setStyle(this.getSpotlightStyle);
-        }
-    };
-
-    // 4. Navigation & Geolocation Manager
+    // 3. Navigation & Spotlight Engine
     const NavigationManager = {
-        init(coord) {
-            this.updateUserMarker(coord[0], coord[1]);
+        init() {
             document.getElementById('nav-close').addEventListener('click', () => this.reset());
         },
         updateUserMarker(lat, lng) {
             userLocation = [lat, lng];
             if (userMarker) mapInstance.removeLayer(userMarker);
             userMarker = L.circleMarker([lat, lng], {
-                radius: 10, fillColor: '#e74c3c', color: '#fff', weight: 3, fillOpacity: 0.9
-            }).addTo(mapInstance).bindPopup("您的目前位置").openPopup();
+                radius: 8, fillColor: '#e74c3c', color: '#fff', weight: 2, fillOpacity: 0.8
+            }).addTo(mapInstance).bindPopup("YOU ARE HERE").openPopup();
         },
         calculateRoute(gymId, lat, lng, district) {
-            if (!userLocation) {
-                alert("請先開啟定位功能以計算路徑。");
-                return;
-            }
+            if (!userLocation) { alert("請先開啟定位。"); return; }
             this.clear();
-            MapContainer.updateSpotlight(district);
+            App.updateSpotlight(district);
             
             routingControl = L.Routing.control({
                 waypoints: [L.latLng(userLocation), L.latLng(lat, lng)],
                 show: false, 
                 addWaypoints: false,
                 fitSelectedRoutes: true,
-                lineOptions: { styles: [{ color: '#3498db', opacity: 0.8, weight: 6 }] },
+                lineOptions: { styles: [{ color: 'var(--accent-action)', opacity: 0.8, weight: 5 }] },
                 createMarker: () => null
             }).addTo(mapInstance);
 
@@ -196,28 +158,31 @@ const App = (() => {
                 const time = Math.round(summary.totalTime / 60);
                 const dist = (summary.totalDistance / 1000).toFixed(1);
                 
-                document.getElementById('nav-summary').classList.remove('hidden');
+                // Show Floating Card
+                const badge = document.getElementById('nav-summary');
                 document.getElementById('nav-time').textContent = `${time} 分鐘`;
-                document.getElementById('nav-dist').textContent = `${dist} km`;
+                document.getElementById('nav-dist').textContent = `${dist} 公里`;
+                badge.classList.remove('hidden');
                 
+                // Update InfoWindow
                 const navSection = document.getElementById(`nav-section-${gymId}`);
                 if (navSection) {
                     navSection.classList.remove('hidden');
                     navSection.innerHTML = `
                         <div class="nav-summary-mini">
-                            <span class="time">${time} 分鐘</span>
-                            <span class="dist">${dist} km (自您位置)</span>
+                            <span class="time">${time} MIN</span>
+                            <span class="dist">${dist} KM (自您的位置)</span>
                         </div>
-                        <i class="fas fa-car" style="color:#3498db;"></i>
+                        <i class="fas fa-car" style="color:var(--accent-bouldering);"></i>
                     `;
                     if (currentOpenedMarker) currentOpenedMarker.getPopup().update();
                 }
-                mapInstance.fitBounds(L.latLngBounds(e.routes[0].coordinates), { padding: [50, 50] });
+                mapInstance.fitBounds(L.latLngBounds(e.routes[0].coordinates), { padding: [80, 80] });
             });
         },
         reset() {
             this.clear();
-            MapContainer.updateSpotlight(null);
+            App.updateSpotlight(null);
             document.getElementById('nav-summary').classList.add('hidden');
             if (userLocation) mapInstance.setView(userLocation, 14);
         },
@@ -229,12 +194,12 @@ const App = (() => {
         }
     };
 
-    // 5. Sidebar Manager (Fixed with Tags)
+    // 4. Sidebar Manager (Japanese Styling)
     const SidebarManager = {
         renderList(gyms) {
             const container = document.getElementById('gym-list');
             if (gyms.length === 0) {
-                container.innerHTML = '<div class="no-results">找不到符合條件的場館</div>';
+                container.innerHTML = '<div style="padding:40px; text-align:center; color:#CCC;"><i class="fas fa-wind" style="font-size:2rem; margin-bottom:10px;"></i><br>NO RESULTS</div>';
                 return;
             }
 
@@ -242,62 +207,62 @@ const App = (() => {
                 const typeList = Array.isArray(gym.type) ? gym.type : [gym.type];
                 const typeTags = typeList.map(t => {
                     const cls = t.includes('抱石') ? 'tag-bouldering' : 'tag-lead';
-                    return `<span class="${cls}" style="font-size:0.65rem; padding:1px 5px; margin-right:4px;">${t}</span>`;
+                    return `<span class="${cls}">${t}</span>`;
                 }).join('');
 
                 return `
                     <div class="gym-list-item" onclick="App.focusGym('${gym.id}')">
                         <h4>${gym.name}</h4>
-                        <p><i class="fas fa-map-marker-alt"></i> ${gym.district}</p>
-                        <div class="tag-container" style="margin-top:6px;">${typeTags}</div>
+                        <p><i class="fas fa-map-marker-alt" style="margin-right:5px;"></i>${gym.district}</p>
+                        <div class="tag-container" style="margin-top:10px;">${typeTags}</div>
                     </div>
                 `;
             }).join('');
         }
     };
 
-    // 6. App Lifecycle
+    // 5. App Core
     async function init() {
-        const fallback = [25.0478, 121.5170]; // 台北車站
+        const fallback = [25.0478, 121.5170]; // Taipei Station
         
-        // Step 1: Request Geolocation Priority
         const getLocation = () => new Promise((resolve) => {
             if (!navigator.geolocation) return resolve(fallback);
             navigator.geolocation.getCurrentPosition(
                 (p) => resolve([p.coords.latitude, p.coords.longitude]),
-                () => {
-                    console.warn("Location denied, using fallback.");
-                    alert("提示：定位失敗或遭拒絕，地圖將以台北車站為中心開啟。");
-                    resolve(fallback);
-                },
+                () => resolve(fallback),
                 { timeout: 5000 }
             );
         });
 
         const startCoord = await getLocation();
         
-        // Step 2: Initialize UI
-        await MapContainer.init(startCoord);
+        mapInstance = L.map('map', { zoomControl: false }).setView(startCoord, 14);
+        L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
+        
+        LayerManager.init();
+        NavigationManager.init();
+        NavigationManager.updateUserMarker(startCoord[0], startCoord[1]);
+
+        const districtData = await DataFetcher.fetchDistricts();
+        if (districtData) {
+            spotlightLayer = L.geoJSON(districtData, { 
+                style: (f) => App.getSpotlightStyle(f), 
+                className: 'spotlight-mask' 
+            }).addTo(mapInstance);
+        }
+
+        markerClusterGroup = L.markerClusterGroup({ 
+            disableClusteringAtZoom: 15,
+            showCoverageOnHover: false
+        }).addTo(mapInstance);
+
         allGyms = await DataFetcher.fetchGyms();
         currentGyms = [...allGyms];
         
-        NavigationManager.init(startCoord);
-        
-        // Initial Rendering
         SidebarManager.renderList(allGyms);
-        const updateMarkers = (gyms) => {
-            markerClusterGroup.clearLayers();
-            gyms.forEach(gym => {
-                const marker = L.marker([gym.location.lat, gym.location.lng]);
-                marker.bindPopup(InfoWindow.render(gym), { className: 'custom-popup', offset: [0, -32], maxWidth: 300 });
-                marker.on('click', () => { currentOpenedMarker = marker; });
-                marker.on('popupclose', () => { if (!activeDistrict) NavigationManager.clear(); currentOpenedMarker = null; });
-                markerClusterGroup.addLayer(marker);
-            });
-        };
-        updateMarkers(allGyms);
+        App.updateMarkers(allGyms);
 
-        // Step 3: Global Event Listeners
+        // Global Listeners
         document.getElementById('search-input').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
             const selectedTypes = [...document.querySelectorAll('.type-filter:checked')].map(cb => cb.value);
@@ -309,7 +274,7 @@ const App = (() => {
                 return matchSearch && matchType;
             });
 
-            updateMarkers(currentGyms);
+            App.updateMarkers(currentGyms);
             SidebarManager.renderList(currentGyms);
         });
 
@@ -322,15 +287,25 @@ const App = (() => {
                 const coord = [p.coords.latitude, p.coords.longitude];
                 NavigationManager.updateUserMarker(coord[0], coord[1]);
                 mapInstance.setView(coord, 15);
-            }, () => alert("定位失敗。"));
+            });
         });
 
-        console.log("台北市攀岩地圖 - 定位驅動重構版啟動完成");
+        console.log("TAIPEI CLIMBING MAP - JAPANESE MINIMALIST VERSION READY.");
     }
 
     return { 
         init,
         startNavigation: (id, lat, lng, dist) => NavigationManager.calculateRoute(id, lat, lng, dist),
+        updateMarkers: (gyms) => {
+            markerClusterGroup.clearLayers();
+            gyms.forEach(gym => {
+                const marker = L.marker([gym.location.lat, gym.location.lng]);
+                marker.bindPopup(InfoWindow.render(gym), { className: 'custom-popup', offset: [0, -32], maxWidth: 300 });
+                marker.on('click', () => { currentOpenedMarker = marker; });
+                marker.on('popupclose', () => { if (!activeDistrict) NavigationManager.clear(); currentOpenedMarker = null; });
+                markerClusterGroup.addLayer(marker);
+            });
+        },
         focusGym: (id) => {
             const gym = allGyms.find(g => g.id === id);
             if (gym) {
@@ -339,6 +314,21 @@ const App = (() => {
                 const m = layers.find(l => l.getLatLng().lat === gym.location.lat);
                 if (m) m.openPopup();
             }
+        },
+        getSpotlightStyle: (feature) => {
+            const props = feature.properties;
+            const townName = (props.TOWN || props.TNAME || "").replace(/\s/g, "");
+            const isTarget = activeDistrict && townName.includes(activeDistrict);
+            return {
+                fillColor: isTarget ? 'transparent' : '#000',
+                fillOpacity: activeDistrict ? (isTarget ? 0 : 0.45) : 0,
+                color: isTarget ? 'var(--accent-bouldering)' : 'transparent',
+                weight: isTarget ? 3 : 0
+            };
+        },
+        updateSpotlight: (districtName) => {
+            activeDistrict = districtName;
+            if (spotlightLayer) spotlightLayer.setStyle((f) => App.getSpotlightStyle(f));
         }
     };
 })();
