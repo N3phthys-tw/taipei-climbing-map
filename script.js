@@ -76,15 +76,10 @@ const App = (() => {
     };
 
     // 3. App Core
-    async function init() {
-        const fallbackCoord = [25.0478, 121.5170];
-        const getLocation = () => new Promise(res => {
-            if (!navigator.geolocation) res(fallbackCoord);
-            navigator.geolocation.getCurrentPosition(p => res([p.coords.latitude, p.coords.longitude]), () => res(fallbackCoord), {timeout:5000});
-        });
+    const DEFAULT_COORD = [25.040456, 121.503585];
 
-        const startCoord = await getLocation();
-        mapInstance = L.map('map', { zoomControl: false }).setView(startCoord, 14);
+    async function init() {
+        mapInstance = L.map('map', { zoomControl: false }).setView(DEFAULT_COORD, 14);
         L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
 
         const data = await DataFetcher.fetchAll();
@@ -92,7 +87,9 @@ const App = (() => {
         
         LayerManager.init();
         NavigationManager.init();
-        App.updateUserMarker(startCoord[0], startCoord[1]);
+        
+        // Initial state: Default location with black marker
+        App.updateUserMarker(DEFAULT_COORD[0], DEFAULT_COORD[1], true);
 
         spotlightLayer = L.geoJSON(data.districts, { style: (f) => App.getSpotlightStyle(f), className: 'spotlight-mask' }).addTo(mapInstance);
         markerClusterGroup = L.markerClusterGroup({ disableClusteringAtZoom: 15 }).addTo(mapInstance);
@@ -105,9 +102,9 @@ const App = (() => {
         document.getElementById('geo-btn').addEventListener('click', () => {
             navigator.geolocation.getCurrentPosition(p => {
                 const coord = [p.coords.latitude, p.coords.longitude];
-                App.updateUserMarker(coord[0], coord[1]);
+                App.updateUserMarker(coord[0], coord[1], false);
                 mapInstance.setView(coord, 15);
-            });
+            }, () => alert("無法取得您的位置"));
         });
 
         FilterManager.updateUI(); // Initial Run
@@ -119,11 +116,14 @@ const App = (() => {
             if (routingControl) { mapInstance.removeControl(routingControl); routingControl = null; }
             document.getElementById('nav-summary').classList.add('hidden');
             App.updateSpotlight(null);
+            
+            // Reset to default location after closing navigation
+            App.updateUserMarker(DEFAULT_COORD[0], DEFAULT_COORD[1], true);
             if (userLocation) mapInstance.panTo(userLocation);
         },
         startNavigation(id, lat, lng, dist) {
             if (!userLocation) return alert("請先定位。");
-            this.reset();
+            this.reset_internal(); // Internal reset to avoid marker flickering
             App.updateSpotlight(dist);
             routingControl = L.Routing.control({
                 waypoints: [L.latLng(userLocation), L.latLng(lat, lng)],
@@ -140,6 +140,10 @@ const App = (() => {
                 document.getElementById('nav-dist').textContent = ''; // Clear residual "--"
                 mapInstance.fitBounds(L.latLngBounds(e.routes[0].coordinates), { padding: [100, 100] });
             });
+        },
+        reset_internal() {
+            if (routingControl) { mapInstance.removeControl(routingControl); routingControl = null; }
+            document.getElementById('nav-summary').classList.add('hidden');
         }
     };
 
@@ -211,10 +215,20 @@ const App = (() => {
                 if (marker) marker.openPopup();
             }
         },
-        updateUserMarker: (lat, lng) => {
+        updateUserMarker: (lat, lng, isDefault = false) => {
             userLocation = [lat, lng];
             if (userMarker) mapInstance.removeLayer(userMarker);
-            userMarker = L.circleMarker([lat, lng], { radius: 8, fillColor: '#e74c3c', color: '#FFF', weight: 2, fillOpacity: 0.8 }).addTo(mapInstance);
+            const color = isDefault ? '#000000' : '#e74c3c';
+            userMarker = L.circleMarker([lat, lng], { 
+                radius: 8, 
+                fillColor: color, 
+                color: '#FFF', 
+                weight: 2, 
+                fillOpacity: 0.8 
+            }).addTo(mapInstance);
+            if (isDefault) {
+                userMarker.bindTooltip("預設地點", { permanent: true, direction: 'top', offset: [0, -10] }).openTooltip();
+            }
         },
         getSpotlightStyle: (f) => {
             const town = (f.properties.TOWN || f.properties.TNAME || "").replace(/\s/g, "");
