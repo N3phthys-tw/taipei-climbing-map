@@ -78,3 +78,95 @@ https://n3phthys-tw.github.io/taipei-climbing-map/
 ---
 
 **Disclaimer**: *本專案僅供開發測試與地理資訊展示參考，導航路徑請以實際路況為準。*
+
+
+
+
+---
+# 台北市攀岩地圖網頁 (Taipei Climbing Map)
+
+**文件類型：** 軟體設計文件 (SDD / README)  
+**規範版本：** OpenSpec v1.0  
+**專案狀態：** 初始設計階段 (Initial Design / Draft)
+
+本專案旨在開發一個輕量化的互動式地圖平台，協助台北市攀岩愛好者快速檢索全市攀岩場館的營運資訊、位置及設施類型。
+
+## 📋 專案總覽 (Overview)
+
+透過視覺化地圖介面，整合台北市內 20–50 個攀岩標點，提供直覺的交互體驗。  
+專案核心設計目標為：**輕量、快速、低維護成本**。
+
+## 💾 資料模型 (Data Schema)
+
+我們採用靜態 JSON 格式進行資料儲存，以 Client-side Rendering (CSR) 模式加載，確保最佳讀取效能。
+
+```json
+{
+  "id": "string",
+  "name": "string (店名)",
+  "location": {
+    "lat": "float (緯度)",
+    "lng": "float (經度)"
+  },
+  "address": "string",
+  "phone": "string",
+  "website": "url",
+  "climbingType": ["Bouldering", "Lead", "Top-Rope"],
+  "businessHours": "string"
+}
+```
+
+## 🏗️ 技術選型與架構 (System Architecture)
+
+| 類別 | 選項 | 說明 |
+|---|---|---|
+| 前端框架 | Vanilla JavaScript / React | 基於新手友善與未來元件化擴充考量 |
+| 地圖引擎 | Leaflet.js | 開源、輕量，且無須綁定 API 金鑰 |
+| 圖資來源 | OpenStreetMap (OSM) | 自由且社群維護之開源圖資 |
+| 渲染機制 | Client-side Rendering (CSR) | 初始化後一次性加載 JSON 數據 |
+
+## 🎨 UI/UX 互動邏輯 (Interaction Design)
+
+本專案的互動路徑規劃為三個核心階段：
+
+### 1. 載入階段 (Initial Load)
+- 預設中心點：台北市中心 `[25.0330, 121.5654]`
+- 預設縮放等級：`z=12`
+
+### 2. 觸發階段 (Trigger)
+- 使用者點擊地圖上的 Marker（自定義攀岩圖標）
+
+### 3. 回饋階段 (Feedback)
+- 彈出 Popup（資訊視窗）
+- 背景適度留白／微暗
+- 視窗內呈現清晰的標籤化資訊
+- 例如：`[抱石]` 以綠色標記顯示
+
+## 🧩 組件職責 (Component Responsibilities)
+
+### MapContainer
+負責地圖實例初始化，處理縮放 (Zoom) 與位移監聽。
+
+### MarkerFactory
+遍歷 JSON 資料，將座標轉換為圖標，並封裝點擊事件。
+
+### InfoWindow (Popup)
+接收單一場館物件數據，動態生成 HTML 字串並渲染至地圖層。
+
+## 🚀 開發藍圖與優化建議 (Roadmap)
+
+### 1. 效能優化 (Performance)
+- **圖標聚合 (Marker Cluster)：** 若點位擴展至全台灣規模，將導入聚合技術避免視覺擁擠。
+
+### 2. 功能增強 (Features)
+- **動態篩選器：** 增加「僅顯示抱石／上攀」或「營業中」的過濾按鈕。
+- **即時定位：** 加入「我的位置」按鈕，幫助使用者快速尋找最近岩館。
+
+### 3. 離線與安全性 (Security & Offline)
+- **PWA 支援：** 導入 Service Worker，讓使用者在收訊較差的岩館室內也能存取。
+- **隱私設定：** 若未來切換至 Google Maps API，需落實 API Key 的安全限制 (Referrer restriction)。
+
+## ⚠️ 注意事項 (Ambiguity)
+
+- **資料獲取：** 目前尚未定義自動化資料抓取來源，實作時需手動維護一份 `gyms.json`。
+- **地圖來源：** 採用 Leaflet 時，請注意 OSM 圖資的使用規範 (Attribution)。
